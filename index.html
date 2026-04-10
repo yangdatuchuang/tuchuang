@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人图床</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box; font-family: 'PingFang SC', sans-serif;}
+        body {background: #f5f7fa; padding: 20px;}
+        .container {max-width: 800px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+        h1 {color: #2c3e50; text-align: center; margin-bottom: 20px;}
+        .upload-area {border: 2px dashed #3498db; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 20px;}
+        .upload-area:hover {border-color: #2980b9; background: #f0f8ff;}
+        .upload-area input {display: none;}
+        .upload-area p {color: #7f8c8d; font-size: 16px;}
+        .preview-area {margin-top: 20px; display: none;}
+        .preview-area img {max-width: 100%; border-radius: 8px; margin-bottom: 15px;}
+        .url-box {background: #f8f9fa; border-radius: 8px; padding: 15px; position: relative;}
+        .url-box input {width: 100%; border: none; background: transparent; font-size: 14px; color: #34495e; outline: none;}
+        .copy-btn {position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #3498db; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;}
+        .copy-btn:hover {background: #2980b9;}
+        .tip {text-align: center; color: #95a5a6; font-size: 12px; margin-top: 20px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>我的个人图床</h1>
+        <div class="upload-area" id="uploadArea">
+            <input type="file" id="fileInput" accept="image/*">
+            <p>点击或拖拽图片到这里上传</p>
+        </div>
+        <div class="preview-area" id="previewArea">
+            <img id="previewImg" alt="预览图">
+            <div class="url-box">
+                <input type="text" id="urlInput" readonly>
+                <button class="copy-btn" id="copyBtn">复制链接</button>
+            </div>
+        </div>
+        <p class="tip">部署到静态托管后，上传的图片会生成公开可访问的URL</p>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewArea = document.getElementById('previewArea');
+        const previewImg = document.getElementById('previewImg');
+        const urlInput = document.getElementById('urlInput');
+        const copyBtn = document.getElementById('copyBtn');
+
+        // 点击上传
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // 拖拽上传
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#2980b9';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#3498db';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#3498db';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFile(files[0]);
+        });
+
+        // 文件选择
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        // 处理文件
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('请上传图片文件！');
+                return;
+            }
+            // 生成预览
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                // 这里是静态托管的核心：上传后图片会存在你的托管空间，URL是你的域名+图片路径
+                // 部署后，你需要把图片上传到托管的images文件夹，然后生成对应URL
+                // 这里先做本地预览，部署后替换为真实上传逻辑
+                const fileName = encodeURIComponent(file.name);
+                // 替换成你的托管域名！
+                const baseUrl = 'https://你的图床域名.com/images/';
+                const imageUrl = baseUrl + fileName;
+                urlInput.value = imageUrl;
+                previewArea.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 复制链接
+        copyBtn.addEventListener('click', () => {
+            urlInput.select();
+            document.execCommand('copy');
+            copyBtn.textContent = '已复制！';
+            setTimeout(() => copyBtn.textContent = '复制链接', 1500);
+        });
+    </script>
+</body>
+</html>
